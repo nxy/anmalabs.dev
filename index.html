@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANMA — AI-Native Module Architecture</title>
+<meta name="description" content="Contracts replace codebases. 14,600 tokens to understand 104 interfaces. Build entire applications for $31.">
+<meta property="og:title" content="ANMA — AI-Native Module Architecture">
+<meta property="og:description" content="Contracts replace codebases. 14,600 tokens to understand 104 interfaces.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://anmalabs.dev">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0c;
+  --bg2:#111116;
+  --bg3:#1a1a22;
+  --fg:#e8e6e3;
+  --fg2:#9995a0;
+  --accent:#22d3a7;
+  --accent2:#16a085;
+  --accent-glow:rgba(34,211,167,.12);
+  --red:#e74c5f;
+  --yellow:#f0c946;
+  --blue:#5b9cf5;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Outfit',sans-serif;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);line-height:1.6;overflow-x:hidden}
+
+/* Noise overlay */
+body::before{
+  content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* Grid lines */
+.grid-bg{
+  position:fixed;inset:0;z-index:0;
+  background-image:
+    linear-gradient(rgba(34,211,167,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(34,211,167,.03) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+
+/* Layout */
+.container{max-width:1100px;margin:0 auto;padding:0 2rem;position:relative;z-index:1}
+
+/* ---- HERO ---- */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:6rem 0 4rem}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--accent);background:var(--accent-glow);
+  padding:.4rem .9rem;border-radius:2px;border:1px solid rgba(34,211,167,.15);
+  margin-bottom:2rem;
+}
+.hero-badge .dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{
+  font-size:clamp(2.8rem,6vw,5rem);font-weight:800;line-height:1.05;
+  letter-spacing:-.03em;max-width:14ch;
+  margin-bottom:1.5rem;
+}
+.hero h1 .thin{font-weight:300;color:var(--fg2)}
+.hero h1 .highlight{color:var(--accent)}
+.hero-sub{font-size:1.25rem;color:var(--fg2);max-width:48ch;margin-bottom:3rem;font-weight:300;line-height:1.5}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.85rem 1.8rem;font-family:var(--mono);font-size:.85rem;font-weight:500;
+  text-decoration:none;border-radius:3px;transition:all .2s;letter-spacing:.02em;
+}
+.btn-primary{background:var(--accent);color:var(--bg);border:1px solid var(--accent)}
+.btn-primary:hover{background:#1be8b5;box-shadow:0 0 30px rgba(34,211,167,.25)}
+.btn-secondary{background:transparent;color:var(--fg);border:1px solid rgba(255,255,255,.15)}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ---- NUMBERS ---- */
+.numbers{padding:5rem 0;border-top:1px solid rgba(255,255,255,.06)}
+.numbers-label{
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--fg2);margin-bottom:2.5rem;
+}
+.numbers-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem}
+.stat{padding:1.5rem 0}
+.stat-value{
+  font-size:clamp(2.2rem,4vw,3.2rem);font-weight:700;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;
+}
+.stat-value .unit{font-size:.5em;color:var(--fg2);font-weight:400;margin-left:.15em}
+.stat-label{font-size:.85rem;color:var(--fg2);margin-top:.3rem;font-weight:300}
+.stat--accent .stat-value{color:var(--accent)}
+
+/* ---- PROBLEM ---- */
+.problem{padding:6rem 0}
+.section-tag{
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--red);margin-bottom:1.5rem;display:block;
+}
+.section-tag--green{color:var(--accent)}
+.problem h2{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;letter-spacing:-.02em;max-width:20ch;margin-bottom:2rem}
+.problem-body{
+  display:grid;grid-template-columns:1fr 1fr;gap:4rem;
+}
+.problem-text{color:var(--fg2);font-size:1.05rem;font-weight:300;line-height:1.7}
+.problem-text p+p{margin-top:1.5rem}
+
+/* Comparison bars */
+.compare{display:flex;flex-direction:column;gap:1.5rem;justify-content:center}
+.compare-item{position:relative}
+.compare-label{font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;color:var(--fg2);margin-bottom:.5rem;display:flex;justify-content:space-between}
+.compare-bar{height:36px;border-radius:3px;position:relative;display:flex;align-items:center;padding-left:1rem}
+.compare-bar span{font-family:var(--mono);font-size:.75rem;font-weight:500}
+.bar-old{background:linear-gradient(90deg,rgba(231,76,95,.2),rgba(231,76,95,.08));border:1px solid rgba(231,76,95,.2);width:100%}
+.bar-old span{color:var(--red)}
+.bar-new{background:linear-gradient(90deg,var(--accent-glow),rgba(34,211,167,.03));border:1px solid rgba(34,211,167,.2);width:12%}
+.bar-new span{color:var(--accent)}
+
+/* ---- HOW IT WORKS ---- */
+.how{padding:6rem 0;border-top:1px solid rgba(255,255,255,.06)}
+.how h2{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;letter-spacing:-.02em;margin-bottom:3.5rem}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.step{background:var(--bg2);padding:2.5rem 2rem;position:relative}
+.step::before{
+  content:attr(data-step);font-family:var(--mono);font-size:5rem;font-weight:700;
+  color:rgba(255,255,255,.03);position:absolute;top:.5rem;right:1rem;line-height:1;
+}
+.step-title{font-family:var(--mono);font-size:.85rem;font-weight:700;color:var(--accent);margin-bottom:.75rem;letter-spacing:.02em}
+.step p{color:var(--fg2);font-size:.9rem;font-weight:300;line-height:1.6}
+
+/* ---- TERMINAL ---- */
+.demo{padding:6rem 0;border-top:1px solid rgba(255,255,255,.06)}
+.demo h2{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;letter-spacing:-.02em;margin-bottom:3rem}
+.terminal{
+  background:var(--bg2);border:1px solid rgba(255,255,255,.08);border-radius:6px;
+  overflow:hidden;max-width:750px;
+}
+.terminal-bar{
+  display:flex;align-items:center;gap:6px;padding:.75rem 1rem;
+  background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);
+}
+.terminal-dot{width:10px;height:10px;border-radius:50%}
+.terminal-dot:nth-child(1){background:#e74c5f}
+.terminal-dot:nth-child(2){background:#f0c946}
+.terminal-dot:nth-child(3){background:#22d3a7}
+.terminal-title{font-family:var(--mono);font-size:.7rem;color:var(--fg2);margin-left:auto}
+.terminal-body{padding:1.5rem;font-family:var(--mono);font-size:.8rem;line-height:1.8}
+.terminal-body .prompt{color:var(--accent)}
+.terminal-body .cmd{color:var(--fg)}
+.terminal-body .output{color:var(--fg2)}
+.terminal-body .success{color:var(--accent)}
+.terminal-body .warn{color:var(--yellow)}
+.terminal-body .line{display:block;min-height:1.8em}
+
+/* ---- RECOVERY ---- */
+.recovery{padding:6rem 0;border-top:1px solid rgba(255,255,255,.06)}
+.recovery h2{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;letter-spacing:-.02em;margin-bottom:1rem}
+.recovery-sub{color:var(--fg2);font-size:1.1rem;font-weight:300;margin-bottom:3rem;max-width:50ch}
+.files-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.file-card{background:var(--bg2);padding:1.5rem;position:relative;overflow:hidden}
+.file-card::after{
+  content:'';position:absolute;top:0;left:0;width:3px;height:100%;
+  background:var(--accent);opacity:.4;
+}
+.file-name{font-family:var(--mono);font-size:.85rem;font-weight:700;color:var(--accent);margin-bottom:.4rem}
+.file-desc{font-size:.8rem;color:var(--fg2);font-weight:300;line-height:1.5}
+.file-tokens{font-family:var(--mono);font-size:.7rem;color:var(--fg2);margin-top:.75rem;opacity:.6}
+
+/* ---- CTA ---- */
+.cta{padding:8rem 0 6rem;text-align:center;border-top:1px solid rgba(255,255,255,.06)}
+.cta h2{font-size:clamp(2rem,4vw,3rem);font-weight:700;letter-spacing:-.02em;margin-bottom:1rem}
+.cta p{color:var(--fg2);font-size:1.1rem;font-weight:300;margin-bottom:2.5rem}
+.cta .hero-actions{justify-content:center}
+
+/* ---- FOOTER ---- */
+footer{
+  padding:2rem 0;border-top:1px solid rgba(255,255,255,.06);
+  font-family:var(--mono);font-size:.7rem;color:rgba(255,255,255,.25);
+  display:flex;justify-content:space-between;align-items:center;
+}
+footer a{color:rgba(255,255,255,.4);text-decoration:none}
+footer a:hover{color:var(--accent)}
+
+/* ---- RESPONSIVE ---- */
+@media(max-width:768px){
+  .problem-body{grid-template-columns:1fr;gap:2.5rem}
+  .steps{grid-template-columns:1fr}
+  .files-grid{grid-template-columns:1fr}
+  .numbers-grid{grid-template-columns:repeat(2,1fr)}
+  footer{flex-direction:column;gap:.5rem;text-align:center}
+}
+
+/* Animations */
+@media(prefers-reduced-motion:no-preference){
+  .hero h1,.hero-sub,.hero-badge,.hero-actions,.stat,.step,.file-card,.compare-item{
+    opacity:0;animation:fadeUp .6s ease forwards;
+  }
+  .hero-badge{animation-delay:.1s}
+  .hero h1{animation-delay:.2s}
+  .hero-sub{animation-delay:.3s}
+  .hero-actions{animation-delay:.4s}
+  .stat:nth-child(1){animation-delay:.1s}
+  .stat:nth-child(2){animation-delay:.2s}
+  .stat:nth-child(3){animation-delay:.3s}
+  .stat:nth-child(4){animation-delay:.4s}
+  .stat:nth-child(5){animation-delay:.5s}
+  .step:nth-child(1){animation-delay:.1s}
+  .step:nth-child(2){animation-delay:.2s}
+  .step:nth-child(3){animation-delay:.3s}
+  .file-card{animation-delay:calc(var(--i,0) * .08s)}
+  .compare-item:nth-child(1){animation-delay:.1s}
+  .compare-item:nth-child(2){animation-delay:.3s}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<div class="container">
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge"><span class="dot"></span> Open Source — BSL 1.1</div>
+  <h1><span class="thin">Contracts</span> replace <span class="highlight">codebases.</span></h1>
+  <p class="hero-sub">ANMA is an AI-native project architecture. Your AI agent reads 6 files and understands your entire system. No scanning. No guessing. No wasted tokens.</p>
+  <div class="hero-actions">
+    <a href="https://github.com/nxy/anma-scaffold" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      Get Started
+    </a>
+    <a href="#how" class="btn btn-secondary">How It Works</a>
+  </div>
+</section>
+
+<!-- NUMBERS -->
+<section class="numbers">
+  <div class="numbers-label">Proven in production</div>
+  <div class="numbers-grid">
+    <div class="stat stat--accent">
+      <div class="stat-value">$31</div>
+      <div class="stat-label">Total cost to scaffold a full app</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">18<span class="unit">modules</span></div>
+      <div class="stat-label">104 interfaces implemented</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">14.6<span class="unit">k tokens</span></div>
+      <div class="stat-label">To understand the entire system</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">28<span class="unit">k lines</span></div>
+      <div class="stat-label">Generated in one session</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">48<span class="unit">min</span></div>
+      <div class="stat-label">API time for all 18 modules</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem">
+  <span class="section-tag">The Problem</span>
+  <h2>AI agents waste most of their tokens understanding your code.</h2>
+  <div class="problem-body">
+    <div class="problem-text">
+      <p>Every time an AI coding agent starts a task, it scans your source files, infers interfaces, guesses at conventions, and reads imports to understand what to build. This understanding phase burns 70-80% of your context window before a single line of code is written.</p>
+      <p>ANMA inverts this. Instead of dumping your codebase into context and hoping the model figures it out, you write contracts that define your system in ~250 tokens per module. The AI reads 6 files and starts building immediately.</p>
+    </div>
+    <div class="compare">
+      <div class="compare-item">
+        <div class="compare-label"><span>Without ANMA</span><span>~150,000 tokens</span></div>
+        <div class="compare-bar bar-old"><span>Scanning, guessing, inferring</span></div>
+      </div>
+      <div class="compare-item">
+        <div class="compare-label"><span>With ANMA</span><span>~14,600 tokens</span></div>
+        <div class="compare-bar bar-new"><span>Done.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <span class="section-tag--green">How It Works</span>
+  <h2>Six files. Full context. Zero ramp-up.</h2>
+  <div class="steps">
+    <div class="step" data-step="01">
+      <div class="step-title">Define contracts</div>
+      <p>Each module gets a CONTRACT.yaml — inputs, outputs, error codes, and behavioral invariants. This is what your AI agent reads instead of source code. ~250 tokens per module.</p>
+    </div>
+    <div class="step" data-step="02">
+      <div class="step-title">Map dependencies</div>
+      <p>GRAPH.yaml defines which modules consume which. MANIFEST.yaml tracks status. The AI knows build order, blast radius, and what's safe to change.</p>
+    </div>
+    <div class="step" data-step="03">
+      <div class="step-title">Build and validate</div>
+      <p>Point any AI coding agent at your contracts. It implements interfaces exactly as specified. The linter validates everything — 23 checks, zero tolerance for drift.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TERMINAL -->
+<section class="demo">
+  <h2>See it work.</h2>
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="terminal-dot"></div>
+      <div class="terminal-dot"></div>
+      <div class="terminal-dot"></div>
+      <div class="terminal-title">~/my-project</div>
+    </div>
+    <div class="terminal-body">
+      <span class="line"><span class="prompt">$</span> <span class="cmd">python3 tools/lint_contracts.py</span></span>
+      <span class="line"></span>
+      <span class="line"><span class="output">Checking CONVENTIONS.yaml...</span> <span class="success">OK</span></span>
+      <span class="line"><span class="output">Checking MANIFEST.yaml...</span> <span class="success">OK</span></span>
+      <span class="line"><span class="output">Checking GRAPH.yaml...</span> <span class="success">OK</span></span>
+      <span class="line"><span class="output">Checking modules/user-auth/CONTRACT.yaml...</span> <span class="success">OK</span></span>
+      <span class="line"><span class="output">Checking modules/todo-api/CONTRACT.yaml...</span> <span class="success">OK</span></span>
+      <span class="line"><span class="output">Checking modules/notifications/CONTRACT.yaml...</span> <span class="success">OK</span></span>
+      <span class="line"></span>
+      <span class="line"><span class="success">✓ 0 errors</span>, <span class="warn">3 warnings</span></span>
+      <span class="line"><span class="output">Total context budget: ~1,200 tokens per module</span></span>
+      <span class="line"><span class="output">Full recovery: 6 files → any agent, any time</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- RECOVERY PATTERN -->
+<section class="recovery">
+  <span class="section-tag--green">The 6-File Recovery Pattern</span>
+  <h2>Any agent. Any time. Zero ramp-up.</h2>
+  <p class="recovery-sub">A new AI agent reads these 6 files and has full context to continue building. No onboarding, no "let me scan the codebase," no hallucinated interfaces.</p>
+  <div class="files-grid">
+    <div class="file-card" style="--i:0">
+      <div class="file-name">CONVENTIONS.yaml</div>
+      <div class="file-desc">Naming rules, patterns, and standards every module follows</div>
+      <div class="file-tokens">~850 tokens</div>
+    </div>
+    <div class="file-card" style="--i:1">
+      <div class="file-name">MANIFEST.yaml</div>
+      <div class="file-desc">All modules, their status, and ownership</div>
+      <div class="file-tokens">~220 tokens</div>
+    </div>
+    <div class="file-card" style="--i:2">
+      <div class="file-name">GRAPH.yaml</div>
+      <div class="file-desc">Dependency edges between modules</div>
+      <div class="file-tokens">~440 tokens</div>
+    </div>
+    <div class="file-card" style="--i:3">
+      <div class="file-name">CONTRACT.yaml</div>
+      <div class="file-desc">Interfaces, inputs, outputs, error codes, behavioral invariants</div>
+      <div class="file-tokens">~250 tokens per module</div>
+    </div>
+    <div class="file-card" style="--i:4">
+      <div class="file-name">STATE.yaml</div>
+      <div class="file-desc">Current implementation status and health</div>
+      <div class="file-tokens">~40 tokens</div>
+    </div>
+    <div class="file-card" style="--i:5">
+      <div class="file-name">MEMORY.yaml</div>
+      <div class="file-desc">What the last agent learned — edge cases, decisions, gotchas</div>
+      <div class="file-tokens">~30 tokens</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2>Start building.</h2>
+  <p>Clone the repo. Run the linter. Read a contract. You'll get it in 5 minutes.</p>
+  <div class="hero-actions">
+    <a href="https://github.com/nxy/anma-scaffold" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      View on GitHub
+    </a>
+    <a href="https://github.com/nxy/anma-scaffold/blob/main/docs/QUICKSTART.md" class="btn btn-secondary">Read the Quickstart</a>
+  </div>
+</section>
+
+</div>
+
+<footer class="container">
+  <span>&copy; 2026 ANMA Labs LLC</span>
+  <a href="mailto:legal@anmalabs.dev">legal@anmalabs.dev</a>
+</footer>
+
+</body>
+</html>
